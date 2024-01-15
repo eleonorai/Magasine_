@@ -1,0 +1,72 @@
+--1
+--SELECT Product.name, Product.id_category
+﻿--From Product JOIN Producer ON Product.id_producer = Producer.id
+﻿--WHERE Producer.name IN ('Львовские Продукты', 'Тираспольский Завод')
+
+--2
+SELECT Product.name, Producer.name, Supplier.name, Category.name
+FROM Product JOIN Producer ON Product.id_producer = Producer.id
+JOIN Supplier ON Product.id_supplier = Supplier.id
+JOIN Category ON Product.id_category = Category.id
+WHERE 
+Producer.name NOT LIKE '%[АКМ]%' AND Category.name NOT IN ('сладости')
+
+--3
+SELECT p.name AS [название товара], c.name AS [категория товара], s.name AS [название поставщика], ct.name AS [страна производителя]
+FROM Product p
+JOIN Delivery d ON p.id = d.id_product
+JOIN Supplier s ON d.id_supplier = s.id
+JOIN Address a ON s.id_address = a.id
+JOIN City c ON a.id_city = c.id
+JOIN Region r ON c.id_region = r.id
+JOIN Country ct ON r.id_country = ct.id
+WHERE ct.name NOT IN ('Украина', 'Польша')
+AND d.price < 50
+AND d.date BETWEEN '2023-10-10' AND (SELECT MAX(date) FROM Delivery)
+
+--4
+SELECT p.name AS [product name], c.name AS [product category], s.name AS [supplier], pr.name AS [producer]
+FROM Product p
+JOIN Supplier s ON p.id_supplier = s.id
+JOIN Producer pr ON p.id_producer = pr.id
+JOIN Category c ON p.id_category = c.id
+JOIN Sale sl ON p.id = sl.id_product
+WHERE c.name IN ('кондитерские', 'безалкогольные') AND sl.quantity > 100
+
+
+--5
+SELECT p.name AS [наименование товара],
+sp.name AS [название поставщика],
+cat.name AS [категория товара],
+s.date_of_sale AS [дата продажи],
+s.price AS [цена продажи],
+s.price * s.quantity AS [общая стоимость]
+
+FROM Product p JOIN Sale s ON p.id = s.id_product
+JOIN Supplier sp ON sp.id = p.id_supplier
+JOIN Category cat ON cat.id = p.id_category
+
+WHERE sp.name IN ('Glovo', 'FastDel', 'УкрТовары')
+ORDER BY 1 ASC
+
+
+--6
+SELECT p.name AS [наименование товара],
+pr.name AS [название производителя],
+s.price AS [цена продажи],
+s.quantity AS [количество единиц],
+s.price * s.quantity AS [общая стоимость],
+s.date_of_sale AS [дата продажи],
+ct.name +', '+ c.name +', '+ a.street AS [полный адрес],
+cat.name AS [категория товара]
+ 
+FROM Product p JOIN Sale s ON p.id = s.id_product
+JOIN Producer pr ON pr.id = p.id_producer
+JOIN Address a ON a.id = pr.id_address
+JOIN City c ON c.id = a.id_city
+JOIN Region r ON r.id = c.id_region
+JOIN Country ct ON ct.id = r.id_country
+JOIN Category cat ON cat.id = p.id_category
+ 
+WHERE pr.name NOT IN ('Coca-Cola Company', 'Pepsi Co')
+ORDER BY 5 DESC
